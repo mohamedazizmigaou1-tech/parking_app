@@ -172,3 +172,138 @@ FROM creneau c
 JOIN diviser d ON c.id_creneau = d.id_creneau
 WHERE d.id_tarif = :id_tarif
 ORDER BY c.debut_creneau;
+
+
+
+
+
+-- =========  Statistiques : Moyenne du nombre de places disponibles par parking à :'instant_ts' =========
+WITH stationnements_intervalles AS (
+    SELECT
+        s.id_stationnement,
+        s.id_place,
+        (s.date_debut::timestamp + s.heure_debut::time) AS ts_debut,
+        (s.date_fin::timestamp + s.heure_fin::time) AS ts_fin
+    FROM stationnement s
+),
+places_occupees AS (
+    SELECT DISTINCT si.id_place
+    FROM stationnements_intervalles si
+    WHERE :'instant_ts'::timestamp >= si.ts_debut
+      AND :'instant_ts'::timestamp < si.ts_fin
+),
+places_disponibles AS (
+    SELECT pl.id_parking, COUNT(*) AS nb_places_disponibles
+    FROM place pl
+    WHERE NOT EXISTS (
+        SELECT 1 FROM places_occupees po WHERE po.id_place = pl.id_place
+    )
+    GROUP BY pl.id_parking
+)
+SELECT AVG(nb_places_disponibles)::NUMERIC(10,2) AS moyenne_places_disponibles
+FROM places_disponibles;
+
+-- =========  Statistiques : Durée moyenne de stationnement d’un véhicule par parking =========
+WITH durees AS (
+    SELECT
+        pl.id_parking,
+        EXTRACT(EPOCH FROM (COALESCE(s.date_fin, CURRENT_DATE)::timestamp + COALESCE(s.heure_fin::time, '23:59:59'::time))
+              - (s.date_debut::timestamp + s.heure_debut::time)) / 3600 AS duree_heures
+    FROM stationnement s
+    JOIN place pl ON s.id_place = pl.id_place
+)
+SELECT
+    id_parking,
+    ROUND(AVG(duree_heures),2) AS duree_moyenne_heures
+FROM durees
+GROUP BY id_parking
+ORDER BY id_parking;
+
+-- =========  Statistiques : Coût moyen du stationnement par véhicule par mois =========
+-- Hypothèse : prix = tarif du creneau associé au tarif appliqué à la place
+WITH stationnements_creneaux AS (
+    SELECT
+        s.id_stationnement,
+        s.id_vehicule,
+        s.id_place,
+        EXTRACT(MONTH FROM s.date_debut) AS mois,
+        EXTRACT(YEAR FROM s.date_debut) AS annee,
+        c.prix
+    FROM stationnement s
+    JOIN place p ON s.id_place = p.id_place
+    JOIN appliquer a ON p.id_parking = a.id_parking AND p.id_categorie_place = a.id_categorie_place
+    JOIN tarif t ON a.id_tarif = t.id_tarif
+    JOIN diviser d ON t.id_tarif = d.id_tarif
+    JOIN creneau c ON d.id_creneau = c.id_creneau
+)
+SELECT
+    id_vehicule,
+    annee,
+    mois,
+    ROUND(SUM(prix),2) AS cout_moyen_mensuel
+FROM stationnements_creneaux
+GROUP BY id_vehicule, annee, mois
+ORDER BY id_vehicule, annee, mois;
+
+-- =========  Classement des parkings les moins utilisés =========
+WITH occupation AS (
+    SELECT
+        pl.id_parking,
+        COUNT(s.id_stationnement) AS nb_stationnements
+    FROM place pl
+    LEFT JOIN stationnement s ON pl.id_place = s.id_place
+    GROUP BY pl.id_parking
+)
+SELECT
+    p.id_parking,
+    p.nom_parking,
+    COALESCE(o.nb_stationnements,0) AS nb_stationnements
+FROM parking p
+LEFT JOIN occupation o ON p.id_parking = o.id_parking
+ORDER BY nb_stationnements ASC;
+
+-- =========  Classement des parkings les plus rentables par commune et par mois =========
+WITH revenus AS (
+    SELECT
+        pl.id_parking,
+        c.id_commune,
+        EXTRACT(YEAR FROM s.date_debut) AS annee,
+        EXTRACT(MONTH FROM s.date_debut) AS mois,
+        SUM(cr.prix) AS revenu_mensuel
+    FROM stationnement s
+    JOIN place pl ON s.id_place = pl.id_place
+    JOIN parking p ON pl.id_parking = p.id_parking
+    JOIN commune c ON p.id_commune = c.id_commune
+    JOIN appliquer a ON pl.id_parking = a.id_parking AND pl.id_categorie_place = a.id_categorie_place
+    JOIN tarif t ON a.id_tarif = t.id_tarif
+    JOIN diviser d ON t.id_tarif = d.id_tarif
+    JOIN creneau cr ON d.id_creneau = cr.id_creneau
+    GROUP BY pl.id_parking, c.id_commune, annee, mois
+)
+SELECT
+    id_commune,
+    id_parking,
+    annee,
+    mois,
+    ROUND(revenu_mensuel,2) AS revenu_mensuel
+FROM revenus
+ORDER BY id_commune, revenu_mensuel DESC;
+
+-- =========  Classement des communes les plus demandées par semaine =========
+WITH stationnements_semaine AS (
+    SELECT
+        c.id_commune,
+        EXTRACT(WEEK FROM s.date_debut) AS semaine,
+        COUNT(s.id_stationnement) AS nb_stationnements
+    FROM stationnement s
+    JOIN place pl ON s.id_place = pl.id_place
+    JOIN parking p ON pl.id_parking = p.id_parking
+    JOIN commune c ON p.id_commune = c.id_commune
+    GROUP BY c.id_commune, semaine
+)
+SELECT
+    id_commune,
+    semaine,
+    nb_stationnements
+FROM stationnements_semaine
+ORDER BY semaine, nb_stationnements DESC;

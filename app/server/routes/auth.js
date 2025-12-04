@@ -28,17 +28,34 @@ router.post('/login', async (req, res) => {
                 'INSERT INTO compte (identifiant, mot_de_passe, date_creation, id_utilisateur) VALUES ($1, $2, CURRENT_DATE, $3)',
                 [username, password, userId]
             );
+            
         } else {
             userId = userCheck.rows[0].id_utilisateur;
             
-            // Check credentials
+            // Check if account exits
             const accountCheck = await db.query(
-                'SELECT * FROM compte WHERE id_utilisateur = $1 AND mot_de_passe = $2',
-                [userId, password]
+                'SELECT * FROM compte WHERE id_utilisateur = $1',
+                [userId]
             );
             
             if (accountCheck.rows.length === 0) {
-                return res.status(401).json({ error: 'Invalid credentials' });
+                // Create account
+                await db.query(
+                    'INSERT INTO compte (identifiant, mot_de_passe, date_creation, id_utilisateur) VALUES ($1, $2, CURRENT_DATE, $3)',
+                    [username, password, userId]
+                );
+            }
+            else{
+                // Check if correct password
+                const pwdCheck = await db.query(
+                    'SELECT * FROM compte WHERE id_utilisateur = $1 AND mot_de_passe = $2',
+                    [userId, password]
+                );
+
+                if (pwdCheck.rows.length === 0) {
+                    return res.status(401).json({ error: 'wrong password' });
+                }
+
             }
         }
         

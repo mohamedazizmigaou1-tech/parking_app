@@ -13,6 +13,9 @@ INSERT INTO commune (id_commune, code_postal, nom_commune) VALUES
 (9, 34000, 'Montpellier'),
 (10, 31000, 'Toulouse');
 
+SELECT setval(pg_get_serial_sequence('commune', 'id_commune'), COALESCE((SELECT MAX(id_commune) FROM commune),0), true);
+
+
 -- ============================================================
 --   INSERT DATA FOR PARKING TABLE
 -- ============================================================
@@ -28,6 +31,10 @@ INSERT INTO parking (id_parking, nom_parking, type_parking, adresse, capacite, i
 (9, 'Parking Capitole', 'Aérien', 'Place du Capitole', 320, 10),
 (10, 'Parking Wilson', 'Souterrain', 'Place Wilson', 280, 10);
 
+
+SELECT setval(pg_get_serial_sequence('parking', 'id_parking'), COALESCE((SELECT MAX(id_parking) FROM parking),0), true);
+
+
 -- ============================================================
 --   INSERT DATA FOR CATEGORIE_PLACE TABLE
 -- ============================================================
@@ -36,6 +43,8 @@ INSERT INTO categorie_place (id_categorie_place, type_place) VALUES
 (2, 'Moto'),
 (3, 'Electrique'),
 (4, 'Van');
+
+SELECT setval(pg_get_serial_sequence('categorie_place', 'id_categorie_place'), COALESCE((SELECT MAX(id_categorie_place) FROM categorie_place),0), true);
 
 -- ============================================================
 --   INSERT DATA FOR PLACE TABLE
@@ -62,6 +71,9 @@ INSERT INTO place (id_place, num_place, etat_place, id_parking, id_categorie_pla
 (19, 'I01', 'Libre', 8, 1),
 (20, 'J01', 'Libre', 9, 1);
 
+SELECT setval(pg_get_serial_sequence('place', 'id_place'), COALESCE((SELECT MAX(id_place) FROM place),0), true);
+
+
 -- ============================================================
 --   INSERT DATA FOR UTILISATEUR TABLE
 -- ============================================================
@@ -76,6 +88,8 @@ INSERT INTO utilisateur (id_utilisateur, p_identite) VALUES
 (8, 'OP345678'),
 (9, 'QR901234'),
 (10, 'ST567890');
+
+SELECT setval(pg_get_serial_sequence('utilisateur', 'id_utilisateur'), COALESCE((SELECT MAX(id_utilisateur) FROM utilisateur),0), true);
 
 -- ============================================================
 --   INSERT DATA FOR VEHICULE TABLE
@@ -92,6 +106,8 @@ INSERT INTO vehicule (id_vehicule, num_immatriculation, marque_vehicule,genre_ve
 (9, 'GH-567-IJ', 'Ducati','Moto', '2021-08-05', 'Excellent', 9000, 9),
 (10, 'KL-890-MN', 'Ford','Voiture', '2018-12-22', 'Bon', 48000, 10);
 
+SELECT setval(pg_get_serial_sequence('vehicule', 'id_vehicule'), COALESCE((SELECT MAX(id_vehicule) FROM vehicule),0), true);
+
 -- ============================================================
 --   INSERT DATA FOR ABONNEMENT TABLE
 -- ============================================================
@@ -106,6 +122,8 @@ INSERT INTO abonnement (id_abonnement, date_debut_abonnement, date_fin_abonnemen
 (8, '2024-02-15', '2024-11-15', 'AU', 70.00),
 (9, '2024-01-20', '2024-12-20', 'AV', 60.00),
 (10, '2024-05-01', '2024-11-01', 'AU', 65.00);
+
+SELECT setval(pg_get_serial_sequence('abonnement', 'id_abonnement'), COALESCE((SELECT MAX(id_abonnement) FROM abonnement),0), true);
 
 -- ============================================================
 --   INSERT DATA FOR POSSEDER_AU TABLE
@@ -142,11 +160,15 @@ INSERT INTO stationnement (id_stationnement, date_debut, date_fin, heure_debut, 
 (9, '2024-05-18', '2024-05-18', '16:00', '20:15', 'Carte', 9, 19, 9),
 (10, '2024-05-19', '2024-05-19', '12:00', '18:45', 'Espèces', 10, 20, 10);
 
+SELECT setval(pg_get_serial_sequence('stationnement', 'id_stationnement'), COALESCE((SELECT MAX(id_stationnement) FROM stationnement),0), true);
+
 -- ============================================================
 --   INSERT DATA FOR TARIF TABLE (Now only has ID)
 -- ============================================================
 INSERT INTO tarif (id_tarif) VALUES
 (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
+
+SELECT setval(pg_get_serial_sequence('tarif', 'id_tarif'), COALESCE((SELECT MAX(id_tarif) FROM tarif),0), true);
 
 -- ============================================================
 --   INSERT DATA FOR CRENEAU TABLE (Time intervals with prices)
@@ -183,6 +205,8 @@ INSERT INTO creneau (id_creneau, prix, debut_creneau, fin_creneau) VALUES
 
 (21, 4.00, '06:00', '22:00'),
 (22, 2.20, '22:00', '06:00');
+
+SELECT setval(pg_get_serial_sequence('creneau', 'id_creneau'), COALESCE((SELECT MAX(id_creneau) FROM creneau),0), true);
 
 -- ============================================================
 --   INSERT DATA FOR DIVISER TABLE (Links creneaux to tarifs)
@@ -244,6 +268,8 @@ INSERT INTO compte (id_compte, identifiant, mot_de_passe, date_creation, id_util
 (8, 'julie.roux', 'julie2023', '2023-08-30', 8),
 (9, 'marc.vincent', 'marcpass', '2023-09-14', 9),
 (10, 'elise.simon', 'elisepass123', '2023-10-25', 10);
+
+SELECT setval(pg_get_serial_sequence('compte', 'id_compte'), COALESCE((SELECT MAX(id_compte) FROM compte),0), true);
 
 -- ============================================================
 --   INSERT DATA FOR APPLIQUER TABLE (Links parking, category, and tarif)
