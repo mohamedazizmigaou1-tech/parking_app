@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Gestion de Parking</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <h1>Connexion Parking</h1>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="identification">Identification:</label>
+                    <input type="text" id="identification" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Nom d'utilisateur:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe:</label>
+                    <input type="text" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Se Connecter / S'inscrire</button>
+            </form>
+            <div id="login-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="screen" style="display: none;">
+        <header class="header">
+            <h1>Dashboard Parking</h1>
+            <div class="user-info">
+                <span id="current-user"></span>
+                <button id="logout-btn" class="btn-secondary">Déconnexion</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <aside class="sidebar">
+                <h3>Requêtes disponibles</h3>
+                <div class="query-buttons">
+                    <button class="query-btn" data-query="voitures-par-parking">
+                        1. Voitures par parking
+                    </button>
+                    <button class="query-btn" data-query="parkings-par-commune">
+                        2. Parkings par commune
+                    </button>
+                    <button class="query-btn" data-query="parkings-satures-jour">
+                        3. Parkings saturés (jour)
+                    </button>
+                    <button class="query-btn" data-query="parkings-satures-instant">
+                        4. Parkings saturés (instant)
+                    </button>
+                    <button class="query-btn" data-query="places-disponibles">
+                        5. Places disponibles
+                    </button>
+                    <button class="query-btn" data-query="vehicules-multi-parkings">
+                        6. Véhicules multi-parkings
+                    </button>
+                    <button class="query-btn user-specific" data-query="mes-vehicules">
+                        7. Mes véhicules
+                    </button>
+                    <button class="query-btn user-specific" data-query="mes-abonnements">
+                        8. Mes abonnements
+                    </button>
+                    <button class="query-btn user-specific" data-query="mon-compte">
+                        9. Mon compte
+                    </button>
+                    <div class="input-group">
+                        <label>Véhicule ID:</label>
+                        <input type="number" id="vehicule-id" placeholder="ID véhicule">
+                        <button class="query-btn" data-query="abonnements-vehicule">
+                            10. Abonnements véhicule
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <label>Place ID:</label>
+                        <input type="number" id="place-id" placeholder="ID place">
+                        <button class="query-btn" data-query="tarif-place">
+                            11. Tarif place
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <label>Parking ID:</label>
+                        <input type="number" id="parking-id" placeholder="ID parking">
+                        <button class="query-btn" data-query="abonnements-parking">
+                            12. Abonnements parking
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <label>Tarif ID:</label>
+                        <input type="number" id="tarif-id" placeholder="ID tarif">
+                        <button class="query-btn" data-query="creneaux-tarif">
+                            13. Créneaux tarif
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Parameters Panel -->
+                <div class="parameters-panel">
+                    <h4>Paramètres</h4>
+                    <div class="parameter">
+                        <label for="param-date">Date:</label>
+                        <input type="date" id="param-date" value="2025-12-04">
+                    </div>
+                    <div class="parameter">
+                        <label for="param-instant">Instant:</label>
+                        <input type="datetime-local" id="param-instant" value="2025-12-04T10:30">
+                    </div>
+                </div>
+            </aside>
+
+            <section class="results-section">
+                <div class="results-header">
+                    <h2 id="current-query-title">Sélectionnez une requête</h2>
+                    <button id="export-btn" class="btn-secondary" style="display: none;">
+                        Exporter CSV
+                    </button>
+                </div>
+                <div class="results-container">
+                    <div id="query-info" class="query-info"></div>
+                    <div id="results-table" class="results-table"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/queries.js"></script>
+</body>
+</html>
