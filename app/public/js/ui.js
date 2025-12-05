@@ -8,9 +8,6 @@ class UIManager {
         document.querySelectorAll('.query-btn').forEach(button => {
             button.addEventListener('click', (e) => this.handleQueryButton(e));
         });
-
-        // Export button handler
-        document.getElementById('export-btn').addEventListener('click', () => this.exportToCSV());
     }
 
     async handleQueryButton(e) {
@@ -132,11 +129,6 @@ class UIManager {
         // Update title
         document.getElementById('current-query-title').textContent = queryTitles[queryType] || queryType;
         
-        // Show/hide export button
-        document.getElementById('export-btn').style.display = data.length > 0 ? 'block' : 'none';
-        document.getElementById('export-btn').dataset.query = queryType;
-        document.getElementById('export-btn').dataset.data = JSON.stringify(data);
-
         // Display query info
         const queryInfo = document.getElementById('query-info');
         queryInfo.innerHTML = `
@@ -200,23 +192,6 @@ class UIManager {
         }
         
         return value;
-    }
-
-    exportToCSV() {
-        const exportBtn = document.getElementById('export-btn');
-        const queryType = exportBtn.dataset.query;
-        const data = JSON.parse(exportBtn.dataset.data);
-        
-        if (!data || data.length === 0) {
-            Utils.showNotification('Aucune donnée à exporter', 'error');
-            return;
-        }
-        
-        const csvContent = Utils.generateCSV(data);
-        const filename = `parking_${queryType}_${new Date().toISOString().split('T')[0]}.csv`;
-        
-        Utils.downloadCSV(csvContent, filename);
-        Utils.showNotification('Export CSV réussi', 'success');
     }
 }
 
